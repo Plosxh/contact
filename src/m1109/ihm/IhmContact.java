@@ -15,9 +15,11 @@ import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 import javax.swing.JComboBox;
 import java.util.HashMap;
+import java.util.HashSet;
 import m1109.nf.Hobby;
 import m1109.nf.DispoSortie;
 import m1109.nf.Region;
+import m1109.nf.Mois;
 /**
  * @author IUT2
  */
@@ -25,25 +27,26 @@ public class IhmContact extends JPanel {
 
     private JTextField       champNom; // Widget de type champ texte pour afficher et saisir le nom du contact
     private JTextField       champPrenom;
-    private JTextField      champDisponibilite;
+    private HashMap<String, JRadioButton> champDisponibilite;
     private JTextField      champRegionDisplay;
     private JComboBox       champRegion;
+    private JComboBox       champJour;
+    private JComboBox       champMois;
+    private JComboBox       champAns;
     private JTextField       champTel;
     private JTextField       champNaissance;
     private JCheckBox       champHobby;
     private JTextField       champEmail;  
     private ButtonGroup     champDispo;
-    private HashMap<Integer, Hobby> hobbies;
-    private JCheckBox       lecture;
-    private JCheckBox       musique;
-    private JCheckBox       cinema;
-    private JCheckBox       sport;
+    private HashMap<String, JCheckBox>       champHobbies;
+
     /*
      * Formulaire pour saisir les informations relatives à un contact
      */
     public IhmContact() {
         super();
-
+        champDisponibilite = new HashMap<String, JRadioButton>();
+        champHobbies = new HashMap<String, JCheckBox>();
         initUIComponents();
     }
     
@@ -71,33 +74,17 @@ public class IhmContact extends JPanel {
         champNaissance = new JTextField(30);
         this.add(champNaissance);
 
-       /*for (Hobby hobby : Hobby.values()) {
-            if (hobby == Hobby.CINEMA) {
-                lierHobby(1,hobby); 
-            } 
-            else if(hobby == Hobby.LECTURE) {
-               lierHobby(2,hobby);
-            }
-            else if(hobby == Hobby.MUSIQUE) {
-               lierHobby(3,hobby);
-            }
-            else if(hobby == Hobby.SPORT) {
-               lierHobby(4,hobby);
-            }
-        }
-       
-      cinema= new JCheckBox("cinema");
-   
-        */
+        
           JLabel labelDispo= new JLabel("Disponibilite");
           this.add(labelDispo);
              champDispo=new ButtonGroup();
      
         for(DispoSortie dis : DispoSortie.values())
         {
+            Integer i =champDisponibilite.size();
             JRadioButton radbut = new JRadioButton(dis.toString());
             champDispo.add(radbut);
-          
+            champDisponibilite.put(dis.toString(),radbut);
             this.add(radbut);
         }
         
@@ -108,10 +95,45 @@ public class IhmContact extends JPanel {
         champRegion = new JComboBox(region);
         this.add(champRegion);
         
+        JLabel labelJour = new JLabel("Jour : ");
+        this.add(labelJour);
+        
+        Integer[] jour= {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
+        champJour = new JComboBox(jour);
+        this.add(champJour);
+        
+        JLabel labelMois = new JLabel("Mois : ");
+        this.add(labelMois);
+        
+        Mois[] mois= Mois.values();
+        champMois = new JComboBox(mois);
+        this.add(champMois);
+        
+        
+        JLabel labelAnnee = new JLabel("Annee : ");
+        this.add(labelAnnee);
+        
+        Integer[] annee= {0};
+        champAns = new JComboBox(annee);
+        
+        for(Integer i=1900; i<=2016;i++)
+        {
+            
+            champAns.addItem(i); 
+        }
+        this.add(champAns);
+        
+        
+        
+        
+        
         for(Hobby h : Hobby.values())
         {
-            JCheckBox check= new JCheckBox(h.toString());
+             Integer i =champHobbies.size();  
+             JCheckBox check= new JCheckBox(h.toString());
+             champHobbies.put(h.toString(),check);
             this.add(check);
+            
         }
         
         
@@ -133,15 +155,32 @@ public class IhmContact extends JPanel {
         // Nom du contact
         champNom.setText(contact.getNom());
         champPrenom.setText(contact.getPrenom()); 
-        String region = (String)champRegion.getSelectedItem().toString();
+        /*String region = (String)champRegion.getSelectedItem().toString();
         champRegionDisplay = new JTextField();
-        champRegionDisplay.setText(region);
+        champRegionDisplay.setText(region);*/
         champTel.setText(contact.getNumeroTelephone());
         champNaissance.setText(contact.getDateNaissance());
-        champDisponibilite = new JTextField();
-        champDisponibilite.setText(contact.getDisponibilite().toString());
+        for(DispoSortie dis : DispoSortie.values())
+        {
+            if (contact.getDisponibilite()==dis)
+            {
+                champDisponibilite.get(dis.toString()).setSelected(true);
+            
+            }
+            
+        }
+        
         champEmail.setText(contact.getEmail());
-        //champHobby.setSelectedIndex();
+        
+        
+        if(!champHobbies.isEmpty())
+        {
+         for(Hobby h : contact.getHobbies())
+        {
+            champHobbies.get(h.toString()).setSelected(true);
+          
+        }
+        }
         
         
         /** TP 1 : à compléter **/
@@ -162,6 +201,10 @@ public class IhmContact extends JPanel {
         contact.setPrenom(champPrenom.getText()); 
         contact.setNumeroTelephone(champTel.getText()); 
         //contact.setDateNaissance(champNaissance.getText());
+        
+        //===================================
+        //GESTION DISPONIBILITE
+        //===================================
         for(DispoSortie dis : DispoSortie.values())
         {
             if (champDispo.toString()==dis.toString())
@@ -171,22 +214,44 @@ public class IhmContact extends JPanel {
             }
             
         }
+       
         
-        //contact.setDisponibilite(champDispo.getSelection()); 
-        contact.setEmail(champEmail.getText()); 
-        //contact.addHobby(champHobby.getText());
-        contact.setRegion((Region) champRegion.getSelectedItem()); 
+        
+        //===================================
+        //GESTION EMAIL
+        //===================================
+        
+        contact.setEmail(champEmail.getText());
+        
+        
+        //===================================
+        //GESTION HOBBIES
+        //===================================        
+        for(Hobby h : Hobby.values())
+        {
+             if(champHobbies.get(h.toString()).isSelected())
+             {contact.addHobby(h);
+             }
+             
+             else
+             {
+                 contact.removeHobby(h);
+             }
+        }
+        
+        
+        //===================================
+        //GESTION REGIONS
+        //===================================
+        
+        contact.setRegion((Region) champRegion.getSelectedItem());
+        contact.setDateNaissance(champJour.getSelectedIndex()+1, (Mois) champMois.getSelectedItem(),(Integer) champAns.getSelectedItem()); 
         
         // TODO : TP1 - renseigner les autres attributs du contact à partir des champs de l'IHM
 
         return true;
     }
     
-    
-    private void lierHobby(Integer numHobby,Hobby ho)
-    {
-        hobbies.put(numHobby,ho);
-    }
     
     
 }

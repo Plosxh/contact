@@ -45,6 +45,7 @@ public class Contact implements java.io.Serializable {
         this.region = Region.ALSACE;        
         this.disponibilite = DispoSortie.SOIR;
         this.hobbies = new HashSet<Hobby>();
+        this.hobbies.add(Hobby.CINEMA);
     }
     
     /**
